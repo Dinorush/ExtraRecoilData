@@ -1,0 +1,7 @@
+.vs/*
+*.vs
+
+ExtraRecoilData/bin/*
+ExtraRecoilData/lib/*
+ExtraRecoilData/obj/*
+/ExtraRecoilData/GameFolder.props
