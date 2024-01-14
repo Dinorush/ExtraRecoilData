@@ -5,12 +5,13 @@ using BepInEx.Unity.IL2CPP;
 using HarmonyLib;
 using System.Diagnostics;
 using Il2CppInterop.Runtime.Injection;
+using ExtraRecoilData.CustomRecoil;
 
 namespace ExtraRecoilData;
 
 [BepInPlugin("Dinorush." + MODNAME, MODNAME, "1.0.0")]
 [BepInDependency("dev.gtfomodding.gtfo-api", BepInDependency.DependencyFlags.HardDependency)]
-[BepInDependency(MTFOUtil.PLUGIN_GUID, BepInDependency.DependencyFlags.HardDependency)]
+//[BepInDependency(MTFOUtil.PLUGIN_GUID, BepInDependency.DependencyFlags.HardDependency)]
 //[BepInDependency("GTFO.InjectLib", BepInDependency.DependencyFlags.HardDependency)]
 internal sealed class Loader : BasePlugin
 {
