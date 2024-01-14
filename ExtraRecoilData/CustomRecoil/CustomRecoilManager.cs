@@ -3,7 +3,7 @@ using System;
 using Il2CppSystem.Collections.Generic;
 using UnityEngine;
 
-namespace ExtraRecoilData.Patches
+namespace ExtraRecoilData.CustomRecoil
 {
     public class CustomRecoilManager : MonoBehaviour
     {
@@ -16,8 +16,8 @@ namespace ExtraRecoilData.Patches
             set
             {
                 crd = value;
-                SetRecoilPattern(ref recoilPattern, crd.RecoilPatternStored);
-                SetRecoilPattern(ref recoilPatternFirst, crd.RecoilPatternFirstStored);
+                SetRecoilPattern(ref recoilPattern, crd.RecoilPattern);
+                SetRecoilPattern(ref recoilPatternFirst, crd.RecoilPatternFirst);
             }
         }
 
@@ -47,7 +47,7 @@ namespace ExtraRecoilData.Patches
 
             localPattern = CreatePatternFromEuclidean(pattern);
         }
-        
+
         protected static List<Vector2> CreatePatternFromPolar(List<float> pattern)
         {
             List<Vector2> newPattern = new(pattern.Count);
@@ -55,14 +55,14 @@ namespace ExtraRecoilData.Patches
             {
                 // Angles are expected to be in degrees with clock angles (0 = up, positive = right).
                 float angle = (-pattern[i] + 90f) * Mathf.Deg2Rad;
-                newPattern.Add(new Vector2((float) Math.Sin(angle), (float) -Math.Cos(angle)));
+                newPattern.Add(new Vector2((float)Math.Sin(angle), (float)-Math.Cos(angle)));
             }
             return newPattern;
         }
 
         protected static List<Vector2> CreatePatternFromEuclidean(List<float> pattern)
         {
-            List<Vector2> newPattern = new(pattern.Count/2);
+            List<Vector2> newPattern = new(pattern.Count / 2);
             for (int i = 0; i < pattern.Count - 1; i += 2)
             {
                 Vector2 dir = pattern[i] != 0 || pattern[i + 1] != 0 ? new Vector2(pattern[i + 1], -pattern[i]) : Vector2.right;
@@ -112,7 +112,7 @@ namespace ExtraRecoilData.Patches
 
             return (recoilDir + patternDir * crd.RecoilPatternPower.GetRandom()) * scale;
         }
- 
+
         public void FireTriggered(float newDelay)
         {
             // JFS - Should be called by GetModifiedRecoil running earlier.

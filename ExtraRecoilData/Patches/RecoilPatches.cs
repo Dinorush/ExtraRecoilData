@@ -1,4 +1,5 @@
-﻿using GameData;
+﻿using ExtraRecoilData.CustomRecoil;
+using GameData;
 using Gear;
 using HarmonyLib;
 using UnityEngine;

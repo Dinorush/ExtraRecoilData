@@ -1,7 +1,7 @@
 ﻿using GameData;
 using Il2CppSystem.Collections.Generic;
 
-namespace ExtraRecoilData.Patches
+namespace ExtraRecoilData.CustomRecoil
 {
     public class CustomRecoilData
     {
@@ -12,8 +12,8 @@ namespace ExtraRecoilData.Patches
         public float RecoilScaleMin { get; set; } = 1f;
         public float RecoilScaleMax { get; set; } = 1f;
 
-        public List<float> RecoilPatternStored { get; set; } = new();
-        public List<float> RecoilPatternFirstStored { get; set; } = new();
+        public List<float> RecoilPattern { get; set; } = new();
+        public List<float> RecoilPatternFirst { get; set; } = new();
         public RecoilPatternAlign RecoilPatternAlign { get; set; } = RecoilPatternAlign.ALIGN;
         public MinMaxValue RecoilPatternPower { get; set; } = new() { Min = 0, Max = 0 };
         public float RecoilPatternResetDelay { get; set; } = 0.016f;

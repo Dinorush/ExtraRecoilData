@@ -1,4 +1,5 @@
-﻿using GameData;
+﻿using ExtraRecoilData.CustomRecoil;
+using GameData;
 using Gear;
 using HarmonyLib;
 using Il2CppSystem.Collections.Generic;
@@ -22,12 +23,7 @@ namespace ExtraRecoilData.Patches
         {
             // Should pull from custom datablock. Temporarily hardcoding.
 
-            crm.recoilScaleDecayDelay = 0.1f;
-            crm.recoilScaleGrowth = .05f;
-            crm.recoilScaleMax = 1f;
-
-            crm.recoilPatternPower.Min = 0.7f;
-            crm.recoilPatternPower.Max = 0.7f;
+            MinMaxValue recoilPatternPower = new() { Min = 0.7f, Max = 0.7f };
 
             List<float> firstPattern = new();
             for (int i = 0; i < 10; i++)
@@ -36,7 +32,17 @@ namespace ExtraRecoilData.Patches
             List<float> pattern = new();
             pattern.Add(90f);
 
-            crm.SetRecoilPatterns(pattern, firstPattern);
+            CustomRecoilData crd = new()
+            {
+                RecoilScaleDecayDelay = 0.1f,
+                RecoilScaleGrowth = .05f,
+                RecoilScaleMax = 5f,
+                RecoilPatternPower = recoilPatternPower,
+                RecoilPattern = pattern,
+                RecoilPatternFirst = firstPattern
+            };
+
+            crm.CRD = crd;
         }
     }
 }
