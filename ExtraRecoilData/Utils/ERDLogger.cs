@@ -2,7 +2,7 @@
 
 namespace ExtraRecoilData.Utils
 {
-    public static class ERDLogger
+    internal static class ERDLogger
     {
         private static ManualLogSource logger = Logger.CreateLogSource(EntryPoint.MODNAME);
 

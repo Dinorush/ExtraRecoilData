@@ -1,5 +1,4 @@
-﻿using ExtraRecoilData.Utils;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -65,6 +64,8 @@ namespace ExtraRecoilData.CustomRecoil
             List<Vector2> newPattern = new(pattern.Count / 2);
             for (int i = 0; i < pattern.Count - 1; i += 2)
             {
+                // Direction is modified here since the input is setup as an intuitive (x, y) coordinate with +x -> right and +y -> up
+                // When applied, however, it is (y, x) with +x -> left and +y -> up.
                 Vector2 dir = pattern[i] != 0 || pattern[i + 1] != 0 ? new Vector2(pattern[i + 1], -pattern[i]) : Vector2.right;
                 dir.Normalize();
                 newPattern.Add(dir);
@@ -80,6 +81,7 @@ namespace ExtraRecoilData.CustomRecoil
             float delta = Clock.Time - lastUpdateTime;
             if (shotDelta > data.RecoilScaleDecayDelay)
             {
+                // If the last update occured before the delay finished, reduce the delta by the missing amount.
                 float decayDelta = delta - Math.Max(0, data.RecoilScaleDecayDelay + lastShotTime + shotDelay - lastUpdateTime);
                 recoilScaleProgress = Math.Max(0, Math.Min(data.RecoilScaleCap, recoilScaleProgress - data.RecoilScaleDecay * decayDelta));
             }
@@ -99,7 +101,7 @@ namespace ExtraRecoilData.CustomRecoil
             UpdateToPresent();
 
             float scale = Mathf.Lerp(data.RecoilScaleMin, data.RecoilScaleMax, recoilScaleProgress / data.RecoilScaleCap);
-            Vector2 patternDir = Vector2.right;
+            Vector2 patternDir = Vector2.right; // right is up in recoil land
             if (recoilPatternFirstIndex < recoilPatternFirst.Count)
                 patternDir = recoilPatternFirst[recoilPatternFirstIndex];
             else if (recoilPattern.Count > 0)

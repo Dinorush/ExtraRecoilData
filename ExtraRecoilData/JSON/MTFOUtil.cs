@@ -6,7 +6,7 @@ using ExtraRecoilData.Utils;
 
 namespace ExtraRecoilData.JSON
 {
-    public static class MTFOUtil
+    internal static class MTFOUtil
     {
         public const string PLUGIN_GUID = "com.dak.MTFO";
         public const BindingFlags PUBLIC_STATIC = BindingFlags.Public | BindingFlags.Static;

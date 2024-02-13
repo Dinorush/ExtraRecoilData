@@ -55,6 +55,8 @@ namespace ExtraRecoilData.Patches
 
             Vector2 newDir = cachedManager.GetModifiedRecoil(__instance.recoilDir);
 
+            // This logic is based on the leaked mono build. In testing, it is still accurate and works correctly.
+            // recoilDir has already been subtracted at this point, so we need to add it back and subtract the new recoilDir.
             Vector2 newForce = __instance.currentRecoilForce;
             newForce.x += (__instance.recoilDir.x - newDir.x) * (1f - recoilData.worldToViewSpaceBlendVertical);
             newForce.y += (__instance.recoilDir.y - newDir.y) * (1f - recoilData.worldToViewSpaceBlendHorizontal);

@@ -1,5 +1,4 @@
 ﻿using GameData;
-using GTFO.API.Utilities;
 using System;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -38,6 +37,7 @@ namespace ExtraRecoilData.JSON
             throw new JsonException("Expected EndObject token");
         }
 
+        // Literally the only reason this class exists, so it doesn't write the backing fields.
         public override void Write(Utf8JsonWriter writer, MinMaxValue value, JsonSerializerOptions options)
         {
             writer.WriteStartObject();

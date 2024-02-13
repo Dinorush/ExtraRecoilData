@@ -7,7 +7,7 @@ using ExtraRecoilData.Utils;
 
 namespace ExtraRecoilData.JSON
 {
-    public static class MTFOPartialDataUtil
+    internal static class MTFOPartialDataUtil
     {
         public const string PLUGIN_GUID = "MTFO.Extension.PartialBlocks";
 
