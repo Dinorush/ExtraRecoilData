@@ -1,9 +1,7 @@
 ﻿using ExtraRecoilData.CustomRecoil;
-using GameData;
+using ExtraRecoilData.Utils;
 using Gear;
 using HarmonyLib;
-using Il2CppSystem.Collections.Generic;
-using UnityEngine;
 
 namespace ExtraRecoilData.Patches
 {
@@ -14,35 +12,11 @@ namespace ExtraRecoilData.Patches
         [HarmonyPostfix]
         private static void AddRecoilManager(BulletWeapon __instance)
         {
-            Loader.DebugLog("Attached to weapon " + __instance.ToString() + " | " + __instance.gameObject);
-            CustomRecoilManager crm = __instance.gameObject.AddComponent<CustomRecoilManager>();
-            SetupRecoilManager(crm);
-        }
+            CustomRecoilData? data = CustomRecoilManager.Current.GetCustomRecoilData(__instance.RecoilData.persistentID);
+            if (data == null) return;
 
-        private static void SetupRecoilManager(CustomRecoilManager crm)
-        {
-            // Should pull from custom datablock. Temporarily hardcoding.
-
-            MinMaxValue recoilPatternPower = new() { Min = 0.7f, Max = 0.7f };
-
-            List<float> firstPattern = new();
-            for (int i = 0; i < 10; i++)
-                firstPattern.Add(360f);
-
-            List<float> pattern = new();
-            pattern.Add(90f);
-
-            CustomRecoilData crd = new()
-            {
-                RecoilScaleDecayDelay = 0.1f,
-                RecoilScaleGrowth = .05f,
-                RecoilScaleMax = 5f,
-                RecoilPatternPower = recoilPatternPower,
-                RecoilPattern = pattern,
-                RecoilPatternFirst = firstPattern
-            };
-
-            crm.CRD = crd;
+            CustomRecoilComponent crm = __instance.gameObject.AddComponent<CustomRecoilComponent>();
+            crm.Data = data;
         }
     }
 }

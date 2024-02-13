@@ -1,131 +1,80 @@
-﻿using GameData;
-using System;
-using Il2CppSystem.Collections.Generic;
-using UnityEngine;
+﻿using ExtraRecoilData.JSON;
+using GTFO.API.Utilities;
+using MTFO.API;
+using System.Collections.Generic;
+using System.IO;
+using ExtraRecoilData.Utils;
 
 namespace ExtraRecoilData.CustomRecoil
 {
-    public class CustomRecoilManager : MonoBehaviour
+    public class CustomRecoilManager
     {
-        public CustomRecoilManager(IntPtr value) : base(value) { }
+        public static CustomRecoilManager Current { get; private set; } = new();
 
-        protected CustomRecoilData crd = new();
-        public CustomRecoilData CRD
+        private readonly Dictionary<uint, CustomRecoilData> customData = new();
+
+        private readonly LiveEditListener liveEditListener;
+
+        public string DEFINITION_PATH { get; private set; }
+
+        public override string ToString()
         {
-            get { return crd; }
-            set
-            {
-                crd = value;
-                SetRecoilPattern(ref recoilPattern, crd.RecoilPattern);
-                SetRecoilPattern(ref recoilPatternFirst, crd.RecoilPatternFirst);
-            }
+            return "Printing manager: " + customData.ToString();
         }
 
-        protected List<Vector2> recoilPattern = new();
-        protected int recoilPatternIndex = 0;
-        protected List<Vector2> recoilPatternFirst = new();
-        protected int recoilPatternFirstIndex = 0;
-
-        protected float recoilScaleProgress = 0f;
-        protected float lastUpdateTime = 0f;
-        protected float lastShotTime = 0f;
-        protected float shotDelay = 0f;
-
-        protected static void SetRecoilPattern(ref List<Vector2> localPattern, List<float> pattern)
+        protected virtual void AddCustomRecoilData(CustomRecoilData? data)
         {
-            localPattern.Clear();
-            foreach (float val in pattern)
-            {
-                // Only values in the range [-1, 1] are considered euclidean; if any are not, then it is a polar pattern.
-                // Patterns can only be of one type.
-                if (Math.Abs(val) > 1)
-                {
-                    localPattern = CreatePatternFromPolar(pattern);
-                    return;
-                }
-            }
+            if (data == null) return;
 
-            localPattern = CreatePatternFromEuclidean(pattern);
+            if (customData.ContainsKey(data.RecoilID))
+                ERDLogger.Warning("Replaced RecoilID " + data.RecoilID);
+
+            customData[data.RecoilID] = data;
         }
 
-        protected static List<Vector2> CreatePatternFromPolar(List<float> pattern)
+        protected virtual void FileChanged(LiveEditEventArgs e)
         {
-            List<Vector2> newPattern = new(pattern.Count);
-            for (int i = 0; i < pattern.Count; i++)
+            ERDLogger.Warning($"LiveEdit File Changed: {e.FullPath}");
+            LiveEdit.TryReadFileContent(e.FullPath, (content) =>
             {
-                // Angles are expected to be in degrees with clock angles (0 = up, positive = right).
-                float angle = (-pattern[i] + 90f) * Mathf.Deg2Rad;
-                newPattern.Add(new Vector2((float)Math.Sin(angle), (float)-Math.Cos(angle)));
-            }
-            return newPattern;
+                List<CustomRecoilData>? dataList = ERDJson.Deserialize<List<CustomRecoilData>>(content);
+
+                if (dataList == null) return;
+
+                foreach (CustomRecoilData data in dataList)
+                    AddCustomRecoilData(data);
+            });
         }
 
-        protected static List<Vector2> CreatePatternFromEuclidean(List<float> pattern)
-        {
-            List<Vector2> newPattern = new(pattern.Count / 2);
-            for (int i = 0; i < pattern.Count - 1; i += 2)
-            {
-                Vector2 dir = pattern[i] != 0 || pattern[i + 1] != 0 ? new Vector2(pattern[i + 1], -pattern[i]) : Vector2.right;
-                newPattern.Add(dir);
-                newPattern[i / 2].Normalize();
-            }
-            return newPattern;
-        }
+        public CustomRecoilData? GetCustomRecoilData(uint RecoilID) => customData.ContainsKey(RecoilID) ? customData[RecoilID] : null;
 
-        protected void UpdateToPresent()
+        private CustomRecoilManager()
         {
-            if (lastUpdateTime == Clock.Time)
-                return;
-
-            float shotDelta = Clock.Time - lastShotTime - shotDelay;
-            float delta = Clock.Time - lastUpdateTime;
-            if (shotDelta > crd.RecoilScaleDecayDelay)
+            DEFINITION_PATH = Path.Combine(MTFOPathAPI.CustomPath, EntryPoint.MODNAME);
+            if (!Directory.Exists(DEFINITION_PATH))
             {
-                float decayDelta = delta - Math.Max(0, crd.RecoilScaleDecayDelay + lastShotTime + shotDelay - lastUpdateTime);
-                recoilScaleProgress = Math.Max(0, Math.Min(crd.RecoilScaleCap, recoilScaleProgress - crd.RecoilScaleDecay * decayDelta));
+                Directory.CreateDirectory(DEFINITION_PATH);
+                var file = File.CreateText(Path.Combine(DEFINITION_PATH, "Template.json"));
+                file.WriteLine(ERDJson.Serialize(new List<CustomRecoilData>() { new() }));
+                file.Flush();
+                file.Close();
             }
 
-            if (shotDelta > crd.RecoilPatternResetDelay)
+            foreach (string confFile in Directory.EnumerateFiles(DEFINITION_PATH, "*.json", SearchOption.AllDirectories))
             {
-                recoilPatternIndex = 0;
-                recoilPatternFirstIndex = 0;
+                string content = File.ReadAllText(confFile);
+                List<CustomRecoilData>? dataList = ERDJson.Deserialize<List<CustomRecoilData>>(content);
+
+                if (dataList == null) continue;
+
+                foreach (CustomRecoilData data in dataList)
+                    AddCustomRecoilData(data);
             }
 
-            lastUpdateTime = Clock.Time;
+            liveEditListener = LiveEdit.CreateListener(DEFINITION_PATH, "*.json", true);
+            liveEditListener.FileChanged += FileChanged;
         }
 
-        public Vector2 GetModifiedRecoil(Vector2 recoilDir)
-        {
-            // Recoil is triggered before FireTriggered runs, so we need to make sure the custom recoil is up to date.
-            UpdateToPresent();
-
-            float scale = Mathf.Lerp(crd.RecoilScaleMin, crd.RecoilScaleMax, recoilScaleProgress / crd.RecoilScaleCap);
-            Vector2 patternDir = Vector2.right;
-            if (recoilPatternFirstIndex < recoilPatternFirst.Count)
-                patternDir = recoilPatternFirst[recoilPatternFirstIndex];
-            else if (recoilPattern.Count > 0)
-                patternDir = recoilPattern[recoilPatternIndex];
-
-            // patternDir is effectively the cos and sin 90 degrees left of the angle we want. This rotates using the right of patternDir.
-            if (crd.RecoilPatternAlign == RecoilPatternAlign.ALIGN)
-                recoilDir.Set(recoilDir.x * patternDir.y + recoilDir.y * patternDir.x, recoilDir.y * patternDir.y - recoilDir.x * patternDir.x);
-
-            return (recoilDir + patternDir * crd.RecoilPatternPower.GetRandom()) * scale;
-        }
-
-        public void FireTriggered(float newDelay)
-        {
-            // JFS - Should be called by GetModifiedRecoil running earlier.
-            UpdateToPresent();
-
-            lastShotTime = Clock.Time;
-            shotDelay = newDelay;
-
-            recoilScaleProgress = Math.Min(recoilScaleProgress + crd.RecoilScaleGrowth, crd.RecoilScaleCap);
-            if (recoilPatternFirstIndex < recoilPatternFirst.Count)
-                recoilPatternFirstIndex++;
-            else if (recoilPattern.Count > 0)
-                recoilPatternIndex = (recoilPatternIndex + 1) % recoilPattern.Count;
-        }
+        static CustomRecoilManager() { }
     }
 }

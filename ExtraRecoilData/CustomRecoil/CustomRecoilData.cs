@@ -1,10 +1,12 @@
 ﻿using GameData;
-using Il2CppSystem.Collections.Generic;
+using System.Collections.Generic;
 
 namespace ExtraRecoilData.CustomRecoil
 {
     public class CustomRecoilData
     {
+        public uint RecoilID { get; set; } = 0;
+        public string Name { get; set; } = string.Empty;
         public float RecoilScaleCap { get; set; } = 1f;
         public float RecoilScaleDecay { get; set; } = 1f;
         public float RecoilScaleDecayDelay { get; set; } = 0.016f;
