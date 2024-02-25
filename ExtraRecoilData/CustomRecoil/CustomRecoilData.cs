@@ -8,11 +8,13 @@ namespace ExtraRecoilData.CustomRecoil
         public uint RecoilID { get; set; } = 0;
         public string Name { get; set; } = string.Empty;
         public float RecoilScaleCap { get; set; } = 1f;
+        public float RecoilScaleThreshold { get; set; } = 0f;
         public float RecoilScaleDecay { get; set; } = 1f;
         public float RecoilScaleDecayDelay { get; set; } = 0.016f;
-        public float RecoilScaleGrowth { get; set; } = 0f;
         public float RecoilScaleMin { get; set; } = 1f;
         public float RecoilScaleMax { get; set; } = 1f;
+        public float RecoilPatternScaleMin { get; set; } = 1f;
+        public float RecoilPatternScaleMax { get; set; } = 1f;
 
         public List<float> RecoilPattern { get; set; } = new();
         public List<float> RecoilPatternFirst { get; set; } = new();

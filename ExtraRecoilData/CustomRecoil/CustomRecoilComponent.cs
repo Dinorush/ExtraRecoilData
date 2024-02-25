@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
+using ExtraRecoilData.Utils;
 
 namespace ExtraRecoilData.CustomRecoil
 {
@@ -15,6 +16,8 @@ namespace ExtraRecoilData.CustomRecoil
             set
             {
                 data = value;
+                data.RecoilScaleCap = data.RecoilScaleCap >= 0 ? data.RecoilScaleCap : 0;
+                data.RecoilScaleThreshold = Mathf.Clamp(data.RecoilScaleThreshold, 0f, data.RecoilScaleCap);
                 SetRecoilPattern(ref recoilPattern, data.RecoilPattern);
                 SetRecoilPattern(ref recoilPatternFirst, data.RecoilPatternFirst);
             }
@@ -100,7 +103,8 @@ namespace ExtraRecoilData.CustomRecoil
             // Recoil is triggered before FireTriggered runs, so we need to make sure the custom recoil is up to date.
             UpdateToPresent();
 
-            float scale = Mathf.Lerp(data.RecoilScaleMin, data.RecoilScaleMax, recoilScaleProgress / data.RecoilScaleCap);
+            float scale = recoilScaleProgress.Map(data.RecoilScaleThreshold, data.RecoilScaleCap, data.RecoilScaleMin, data.RecoilScaleMax);
+            float patternScale = recoilScaleProgress.Map(data.RecoilScaleThreshold, data.RecoilScaleCap, data.RecoilPatternScaleMin, data.RecoilPatternScaleMax);
             Vector2 patternDir = Vector2.right; // right is up in recoil land
             if (recoilPatternFirstIndex < recoilPatternFirst.Count)
                 patternDir = recoilPatternFirst[recoilPatternFirstIndex];
@@ -111,7 +115,7 @@ namespace ExtraRecoilData.CustomRecoil
             if (data.RecoilPatternAlign == RecoilPatternAlign.ALIGN)
                 recoilDir.Set(recoilDir.x * patternDir.x - recoilDir.y * patternDir.y, recoilDir.y * patternDir.x + recoilDir.x * patternDir.y);
 
-            return (recoilDir + patternDir * data.RecoilPatternPower.GetRandom()) * scale;
+            return (recoilDir * scale + patternDir * data.RecoilPatternPower.GetRandom() * patternScale);
         }
 
         public void FireTriggered(float newDelay)
@@ -122,7 +126,7 @@ namespace ExtraRecoilData.CustomRecoil
             lastShotTime = Clock.Time;
             shotDelay = newDelay;
 
-            recoilScaleProgress = Math.Min(recoilScaleProgress + data.RecoilScaleGrowth, data.RecoilScaleCap);
+            recoilScaleProgress = Math.Min(recoilScaleProgress + 1, data.RecoilScaleCap);
             if (recoilPatternFirstIndex < recoilPatternFirst.Count)
                 recoilPatternFirstIndex++;
             else if (recoilPattern.Count > 0)
