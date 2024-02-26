@@ -26,10 +26,10 @@ namespace ExtraRecoilData.CustomRecoil
         {
             if (data == null) return;
 
-            if (customData.ContainsKey(data.RecoilID))
-                ERDLogger.Warning("Replaced RecoilID " + data.RecoilID);
+            if (customData.ContainsKey(data.ArchetypeID))
+                ERDLogger.Warning("Replaced custom recoil for ArchetypeID " + data.ArchetypeID);
 
-            customData[data.RecoilID] = data;
+            customData[data.ArchetypeID] = data;
         }
 
         protected virtual void FileChanged(LiveEditEventArgs e)

@@ -5,7 +5,7 @@ namespace ExtraRecoilData.CustomRecoil
 {
     public class CustomRecoilData
     {
-        public uint RecoilID { get; set; } = 0;
+        public uint ArchetypeID { get; set; } = 0;
         public string Name { get; set; } = string.Empty;
         public float RecoilScaleCap { get; set; } = 1f;
         public float RecoilScaleThreshold { get; set; } = 0f;

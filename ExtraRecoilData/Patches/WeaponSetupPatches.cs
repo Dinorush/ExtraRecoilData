@@ -12,7 +12,7 @@ namespace ExtraRecoilData.Patches
         [HarmonyPostfix]
         private static void AddRecoilManager(BulletWeapon __instance)
         {
-            CustomRecoilData? data = CustomRecoilManager.Current.GetCustomRecoilData(__instance.RecoilData.persistentID);
+            CustomRecoilData? data = CustomRecoilManager.Current.GetCustomRecoilData(__instance.ArchetypeID);
             if (data == null) return;
 
             CustomRecoilComponent crm = __instance.gameObject.AddComponent<CustomRecoilComponent>();
