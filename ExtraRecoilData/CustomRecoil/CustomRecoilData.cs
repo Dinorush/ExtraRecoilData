@@ -21,5 +21,7 @@ namespace ExtraRecoilData.CustomRecoil
         public RecoilPatternAlign RecoilPatternAlign { get; set; } = RecoilPatternAlign.ALIGN;
         public MinMaxValue RecoilPatternPower { get; set; } = new() { Min = 0, Max = 0 };
         public float RecoilPatternResetDelay { get; set; } = 0.016f;
+
+        public bool RecoilDelayStartOnFire = false;
     }
 }

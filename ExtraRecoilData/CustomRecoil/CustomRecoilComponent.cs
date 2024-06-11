@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using ExtraRecoilData.Utils;
+using System.Linq;
 
 namespace ExtraRecoilData.CustomRecoil
 {
@@ -30,24 +31,15 @@ namespace ExtraRecoilData.CustomRecoil
 
         protected float recoilScaleProgress = 0f;
         protected float lastUpdateTime = 0f;
-        protected float lastShotTime = 0f;
-        protected float shotDelay = 0f;
+        protected float nextShotTime = 0f;
 
         protected static void SetRecoilPattern(ref List<Vector2> localPattern, List<float> pattern)
         {
             localPattern.Clear();
-            foreach (float val in pattern)
-            {
-                // Only values in the range [-1, 1] are considered euclidean; if any are not, then it is a polar pattern.
-                // Patterns can only be of one type.
-                if (Math.Abs(val) > 1)
-                {
-                    localPattern = CreatePatternFromPolar(pattern);
-                    return;
-                }
-            }
-
-            localPattern = CreatePatternFromEuclidean(pattern);
+            if (pattern.Any(val => Math.Abs(val) > 1))
+                localPattern = CreatePatternFromPolar(pattern);
+            else
+                localPattern = CreatePatternFromEuclidean(pattern);
         }
 
         protected static List<Vector2> CreatePatternFromPolar(List<float> pattern)
@@ -80,12 +72,12 @@ namespace ExtraRecoilData.CustomRecoil
         {
             if (lastUpdateTime == Clock.Time) return;
 
-            float shotDelta = Clock.Time - lastShotTime - shotDelay;
+            float shotDelta = Clock.Time - nextShotTime;
             float delta = Clock.Time - lastUpdateTime;
             if (shotDelta > data.RecoilScaleDecayDelay)
             {
                 // If the last update occured before the delay finished, reduce the delta by the missing amount.
-                float decayDelta = delta - Math.Max(0, data.RecoilScaleDecayDelay + lastShotTime + shotDelay - lastUpdateTime);
+                float decayDelta = delta - Math.Max(0, data.RecoilScaleDecayDelay + nextShotTime - lastUpdateTime);
                 recoilScaleProgress = Math.Max(0, Math.Min(data.RecoilScaleCap, recoilScaleProgress - data.RecoilScaleDecay * decayDelta));
             }
 
@@ -118,13 +110,12 @@ namespace ExtraRecoilData.CustomRecoil
             return (recoilDir * scale + patternDir * data.RecoilPatternPower.GetRandom() * patternScale);
         }
 
-        public void FireTriggered(float newDelay)
+        public void FireTriggered(float newShotTime)
         {
             // JFS - Should be called by GetModifiedRecoil running earlier.
             UpdateToPresent();
 
-            lastShotTime = Clock.Time;
-            shotDelay = newDelay;
+            nextShotTime = data.RecoilDelayStartOnFire ? Clock.Time : newShotTime;
 
             recoilScaleProgress = Math.Min(recoilScaleProgress + 1, data.RecoilScaleCap);
             if (recoilPatternFirstIndex < recoilPatternFirst.Count)

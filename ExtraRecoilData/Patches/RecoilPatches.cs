@@ -1,22 +1,24 @@
 ﻿using ExtraRecoilData.CustomRecoil;
-using ExtraRecoilData.Utils;
+using System;
 using GameData;
 using Gear;
 using HarmonyLib;
-using Il2CppSystem.Data;
 using UnityEngine;
 
 namespace ExtraRecoilData.Patches
 {
     internal static class RecoilPatches
     {
-        static Weapon? cachedWeapon;
+        static BulletWeapon? cachedWeapon;
         static CustomRecoilComponent? cachedManager;
 
-        private static CustomRecoilComponent? GetCustomRecoilManager(Weapon? newWeapon = null)
+        private static CustomRecoilComponent? GetCustomRecoilManager(BulletWeapon? newWeapon = null)
         {
             if (newWeapon == null)
                 return cachedManager;
+
+            if (newWeapon.Owner?.IsLocallyOwned != true)
+                return null;
 
             if (newWeapon != cachedWeapon)
             {
@@ -43,7 +45,7 @@ namespace ExtraRecoilData.Patches
             CustomRecoilComponent? crm = GetCustomRecoilManager(__instance.m_weapon);
             if (crm == null) return;
 
-            crm.FireTriggered(System.Math.Max(0, System.Math.Max(__instance.m_nextShotTimer, __instance.m_nextBurstTimer) - Clock.Time));
+            crm.FireTriggered(Math.Max(0, Math.Max(__instance.m_nextShotTimer, __instance.m_nextBurstTimer)));
         }
 
         [HarmonyPatch(typeof(FPS_RecoilSystem), nameof(FPS_RecoilSystem.ApplyRecoil))]

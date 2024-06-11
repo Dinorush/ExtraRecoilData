@@ -9,7 +9,7 @@ using ExtraRecoilData.JSON;
 
 namespace ExtraRecoilData;
 
-[BepInPlugin("Dinorush." + MODNAME, MODNAME, "1.2.0")]
+[BepInPlugin("Dinorush." + MODNAME, MODNAME, "1.3.0")]
 [BepInDependency("dev.gtfomodding.gtfo-api", BepInDependency.DependencyFlags.HardDependency)]
 [BepInDependency(MTFOUtil.PLUGIN_GUID, BepInDependency.DependencyFlags.HardDependency)]
 [BepInDependency(MTFOPartialDataUtil.PLUGIN_GUID, BepInDependency.DependencyFlags.SoftDependency)]

@@ -12,6 +12,8 @@ namespace ExtraRecoilData.Patches
         [HarmonyPostfix]
         private static void AddRecoilManager(BulletWeapon __instance)
         {
+            if (__instance.Owner?.IsLocallyOwned != true) return;
+
             CustomRecoilData? data = CustomRecoilManager.Current.GetCustomRecoilData(__instance.ArchetypeID);
             if (data == null) return;
 
