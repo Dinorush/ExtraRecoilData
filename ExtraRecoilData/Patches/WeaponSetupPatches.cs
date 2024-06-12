@@ -1,24 +1,26 @@
 ﻿using ExtraRecoilData.CustomRecoil;
-using ExtraRecoilData.Utils;
 using Gear;
 using HarmonyLib;
+using Player;
 
 namespace ExtraRecoilData.Patches
 {
     internal static class WeaponSetupPatches
     {
-        [HarmonyPatch(typeof(BulletWeapon), nameof(BulletWeapon.SetupArchetype))]
+        [HarmonyPatch(typeof(BulletWeaponArchetype), nameof(BulletWeaponArchetype.SetOwner))]
         [HarmonyWrapSafe]
         [HarmonyPostfix]
-        private static void AddRecoilManager(BulletWeapon __instance)
+        private static void SetupCallback(BulletWeaponArchetype __instance, PlayerAgent owner)
         {
-            if (__instance.Owner?.IsLocallyOwned != true) return;
+            if (owner == null) return;
 
-            CustomRecoilData? data = CustomRecoilManager.Current.GetCustomRecoilData(__instance.ArchetypeID);
+            CustomRecoilData? data = CustomRecoilManager.Current.GetCustomRecoilData(__instance.m_archetypeData.persistentID);
             if (data == null) return;
 
-            CustomRecoilComponent crm = __instance.gameObject.AddComponent<CustomRecoilComponent>();
-            crm.Data = data;
+            if (__instance.m_weapon.gameObject.GetComponent<CustomRecoilComponent>() != null) return;
+
+            CustomRecoilComponent cwc = __instance.m_weapon.gameObject.AddComponent<CustomRecoilComponent>();
+            cwc.Data = data;
         }
     }
 }
