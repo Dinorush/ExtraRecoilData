@@ -46,7 +46,7 @@ namespace ExtraRecoilData.CustomRecoil
             });
         }
 
-        public CustomRecoilData? GetCustomRecoilData(uint RecoilID) => customData.ContainsKey(RecoilID) ? customData[RecoilID] : null;
+        public CustomRecoilData? GetCustomRecoilData(uint ArchetypeID) => customData.ContainsKey(ArchetypeID) ? customData[ArchetypeID] : null;
 
         private CustomRecoilManager()
         {
