@@ -12,6 +12,12 @@ namespace ExtraRecoilData.Patches
         static BulletWeapon? cachedWeapon;
         static CustomRecoilComponent? cachedManager;
 
+        internal static void RefreshCache(BulletWeapon weapon)
+        {
+            if (cachedWeapon != null && weapon.GetInstanceID() == cachedWeapon.GetInstanceID())
+                cachedManager = cachedWeapon.GetComponent<CustomRecoilComponent>();
+        }
+
         private static CustomRecoilComponent? GetCustomRecoilManager(BulletWeapon? newWeapon = null)
         {
             if (newWeapon == null)
@@ -20,7 +26,7 @@ namespace ExtraRecoilData.Patches
             if (newWeapon.Owner?.IsLocallyOwned != true)
                 return null;
 
-            if (newWeapon != cachedWeapon)
+            if (cachedWeapon == null || newWeapon.GetInstanceID() != cachedWeapon.GetInstanceID())
             {
                 cachedWeapon = newWeapon;
                 cachedManager = newWeapon.GetComponent<CustomRecoilComponent>();
