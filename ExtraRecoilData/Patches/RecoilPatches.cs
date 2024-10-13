@@ -43,6 +43,17 @@ namespace ExtraRecoilData.Patches
             GetCustomRecoilManager(__instance);
         }
 
+        [HarmonyPatch(typeof(BulletWeapon), nameof(BulletWeapon.OnUnWield))]
+        [HarmonyWrapSafe]
+        [HarmonyPostfix]
+        private static void RemoveCurrentWeapon(BulletWeapon __instance)
+        {
+            if (__instance.Owner?.IsLocallyOwned == false) return;
+
+            cachedWeapon = null;
+            cachedManager = null;
+        }
+
         [HarmonyPatch(typeof(BulletWeaponArchetype), nameof(BulletWeaponArchetype.PostFireCheck))]
         [HarmonyWrapSafe]
         [HarmonyPostfix]
