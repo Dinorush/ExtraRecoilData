@@ -54,15 +54,29 @@ namespace ExtraRecoilData.Patches
             cachedManager = null;
         }
 
-        [HarmonyPatch(typeof(BulletWeaponArchetype), nameof(BulletWeaponArchetype.PostFireCheck))]
+        [HarmonyPatch(typeof(BWA_Auto), nameof(BWA_Auto.OnFireShot))]
+        [HarmonyPatch(typeof(BWA_Burst), nameof(BWA_Burst.OnFireShot))]
+        [HarmonyPatch(typeof(BWA_Semi), nameof(BWA_Semi.OnFireShot))]
         [HarmonyWrapSafe]
         [HarmonyPostfix]
+        [HarmonyPriority(Priority.High)]
         private static void UpdateCustomRecoil(BulletWeaponArchetype __instance)
         {
             CustomRecoilComponent? crm = GetCustomRecoilManager(__instance.m_weapon);
             if (crm == null) return;
 
-            crm.FireTriggered(Math.Max(0, Math.Max(__instance.m_nextShotTimer, __instance.m_nextBurstTimer)));
+            crm.FireTriggered();
+        }
+
+        [HarmonyPatch(typeof(BulletWeaponArchetype), nameof(BulletWeaponArchetype.PostFireCheck))]
+        [HarmonyWrapSafe]
+        [HarmonyPostfix]
+        private static void UpdateCustomRecoilTime(BulletWeaponArchetype __instance)
+        {
+            CustomRecoilComponent? crm = GetCustomRecoilManager(__instance.m_weapon);
+            if (crm == null) return;
+
+            crm.UpdateNextShotTime(Math.Max(0, Math.Max(__instance.m_nextShotTimer, __instance.m_nextBurstTimer)));
         }
 
         [HarmonyPatch(typeof(FPS_RecoilSystem), nameof(FPS_RecoilSystem.ApplyRecoil))]

@@ -74,7 +74,5 @@ namespace ExtraRecoilData.CustomRecoil
             liveEditListener = LiveEdit.CreateListener(DEFINITION_PATH, "*.json", true);
             liveEditListener.FileChanged += FileChanged;
         }
-
-        static CustomRecoilManager() { }
     }
 }

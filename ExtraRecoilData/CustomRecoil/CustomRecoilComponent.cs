@@ -110,18 +110,24 @@ namespace ExtraRecoilData.CustomRecoil
             return (recoilDir * scale + patternDir * data.RecoilPatternPower.GetRandom() * patternScale);
         }
 
-        public void FireTriggered(float newShotTime)
+        public void FireTriggered()
         {
             // JFS - Should be called by GetModifiedRecoil running earlier.
             UpdateToPresent();
 
-            nextShotTime = data.RecoilDelayStartOnFire ? Clock.Time : newShotTime;
+            nextShotTime = Clock.Time;
 
             recoilScaleProgress = Math.Min(recoilScaleProgress + 1, data.RecoilScaleCap);
             if (recoilPatternFirstIndex < recoilPatternFirst.Count)
                 recoilPatternFirstIndex++;
             else if (recoilPattern.Count > 0)
                 recoilPatternIndex = (recoilPatternIndex + 1) % recoilPattern.Count;
+        }
+
+        public void UpdateNextShotTime(float newShotTime)
+        {
+            if (!data.RecoilDelayStartOnFire)
+                nextShotTime = newShotTime;
         }
     }
 }
